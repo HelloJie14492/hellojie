@@ -1,0 +1,11 @@
+transformers==4.51.3
+tira
+click
+numpy==1.26.4
+peft==0.8.2
+bitsandbytes==0.42.0
+accelerate==0.26.1
+datasets==2.16.1
+torch==2.1.0
+torchvision==0.16.0
+torchaudio==2.1.0
