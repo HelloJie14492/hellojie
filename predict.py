@@ -35,6 +35,7 @@ def build_tokenizer(model_id: str = BASE_MODEL_ID):
         local_files_only=True,
     )
     tokenizer.pad_token = tokenizer.eos_token
+    assert tokenizer.pad_token is not None
     return tokenizer
 
 def build_model(lora_dir, base_id: str = BASE_MODEL_ID):
@@ -50,14 +51,11 @@ def build_model(lora_dir, base_id: str = BASE_MODEL_ID):
     model.eval()
     return model
 
-def predict(checkpoint, sentences):
-    tokenizer = build_tokenizer()
+def predict(tokenizer, lora_model, sentences):
     input_ids = tokenize_function(tokenizer, sentences)
-    lora_model = build_model(checkpoint)
     predict = lora_model(input_ids)
     result = predict.logits.argmax(dim=1).tolist()
-    print(result)
-    return result
+    return result[:-1]
 
 
 def run_baseline(problems: "pd.DataFrame", output_path: Path, checkpoint: str):
@@ -72,13 +70,16 @@ def run_baseline(problems: "pd.DataFrame", output_path: Path, checkpoint: str):
     :param output_path: output folder to write solution files
     """
     print(f'Write outputs {len(problems)} problems to to {output_path}.')
+    tokenizer = build_tokenizer()
+    lora_model = build_model(checkpoint)
+    lora_model.config.pad_token_id = tokenizer.pad_token_id
     for _, i in problems.iterrows():
         output_file = output_path / i["file"].replace("/problem-", "/solution-problem-").replace(".txt", ".json").replace("/train/", "/").replace("/test/", "/").replace("/validation/", "/")
 
         output_file.parent.mkdir(parents=True, exist_ok=True)
         with open(output_file, 'w') as out:
             paragraphs = i["paragraphs"]
-            result = predict(checkpoint, paragraphs)
+            result = predict(tokenizer, lora_model, paragraphs)
             prediction = {'changes': [item for item in result]}
             print(f'prediction: {prediction}')
             out.write(json.dumps(prediction))

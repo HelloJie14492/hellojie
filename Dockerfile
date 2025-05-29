@@ -12,14 +12,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # ---- 复制代码/模型 ----
-COPY run.sh        ./run.sh
-COPY predict.py    ./predict.py
 COPY model-easy/   ./model-easy/
 COPY model-medium/ ./model-medium/
 COPY model-hard/   ./model-hard/
-# COPY model/       /workspace/model/
-
-RUN chmod +x run.sh
-
-# ---- 入口 ----
-ENTRYPOINT ["bash", "run.sh"]
+COPY predict.py    ./predict.py
