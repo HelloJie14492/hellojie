@@ -55,7 +55,7 @@ def predict(tokenizer, lora_model, sentences):
     input_ids = tokenize_function(tokenizer, sentences)
     predict = lora_model(input_ids)
     result = predict.logits.argmax(dim=1).tolist()
-    return result
+    return result[:-1]
 
 
 def run_baseline(problems: "pd.DataFrame", output_path: Path, checkpoint: str):
